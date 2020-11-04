@@ -62,7 +62,8 @@ public class ratings_display extends AppCompatActivity {
         rys=findViewById(R.id.rateyourself);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(false);
+
 
         rys.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,6 +140,7 @@ public class ratings_display extends AppCompatActivity {
                 .build();
        adapter a = new adapter(options);
        a.startListening();
+       ref.keepSynced(true);
        recyclerView.setAdapter(a);
     }
 }
@@ -157,13 +159,26 @@ class adapter extends FirebaseRecyclerAdapter<Ratings,adapter.vholder> {
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull adapter.vholder holder, int position, @NonNull Ratings model) {
+    protected void onBindViewHolder(@NonNull final adapter.vholder holder, int position, @NonNull Ratings model) {
         holder.rating.setRating(Integer.parseInt(model.getRating()));
+        holder.rating.setFocusable(false);
+        holder.rating.setIsIndicator(true);
         String uid=getRef(position).getKey();
+        if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(uid)){
+
+            holder.ton.setText("Yours");
+        }
+        else {
+            holder.ton.setVisibility(View.GONE);
+        }
+
+        holder.sem.setVisibility(View.GONE);
         FirebaseDatabase.getInstance().getReference().child("users").child(uid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String username = dataSnapshot.child("username").getValue().toString();
+
+                holder.Name.setText(username);
 
             }
 
